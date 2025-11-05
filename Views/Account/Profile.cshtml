@@ -1,0 +1,44 @@
+@model secureAuth0.Models.UserProfile
+
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="profile-card fade-in-up">
+    <div class="mb-4">
+        @if (!string.IsNullOrEmpty(Model.ProfileImageUrl))
+        {
+            <img src="@Model.ProfileImageUrl" alt="Profile Picture" class="profile-avatar" />
+        }
+        else
+        {
+            <div class="profile-avatar d-flex align-items-center justify-content-center" style="background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; font-size: 2rem; font-weight: 600;">
+                @(Model.Name?.FirstOrDefault().ToString().ToUpper() ?? "U")
+            </div>
+        }
+    </div>
+    
+    <h2 class="profile-name">@(Model.Name ?? "User")</h2>
+    <p class="profile-email">@(Model.Email ?? "No email provided")</p>
+    
+    <div class="profile-info">
+        <div class="info-item">
+            <div class="info-label">Full Name</div>
+            <div class="info-value">@(Model.Name ?? "Not provided")</div>
+        </div>
+        
+        <div class="info-item">
+            <div class="info-label">Email Address</div>
+            <div class="info-value">@(Model.Email ?? "Not provided")</div>
+        </div>
+    </div>
+    
+    <div class="mt-4 d-flex gap-3 justify-content-center flex-wrap">
+        <a asp-area="" asp-controller="Account" asp-action="Auth0UserInfo" class="btn btn-modern">
+            <i class="fas fa-info-circle me-2"></i>Full Profile Details
+        </a>
+        <a asp-area="" asp-controller="Account" asp-action="MyPrivacy" class="btn btn-outline-modern">
+            <i class="fas fa-shield-alt me-2"></i>Privacy Settings
+        </a>
+    </div>
+</div> 

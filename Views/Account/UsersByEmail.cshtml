@@ -1,0 +1,219 @@
+@model List<secureAuth0.Models.UserProfile>
+@{
+    ViewData["Title"] = "Account Management";
+}
+
+<div class="container">
+    <div class="content-card fade-in-up" style="max-width: 1000px;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2><i class="fas fa-link me-2"></i>Account Management</h2>
+                <p class="text-muted mb-0">Manage multiple accounts with the same email address</p>
+            </div>
+            <a href="/Home/Index" class="btn btn-outline-modern">
+                <i class="fas fa-arrow-left me-2"></i>Back to Home
+            </a>
+        </div>
+
+        @if (Model != null && Model.Count > 0)
+        {
+            <div class="alert alert-info d-flex align-items-center mb-4" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 12px;">
+                <i class="fas fa-info-circle me-3" style="color: #3b82f6; font-size: 1.5rem;"></i>
+                <div>
+                    <strong>Multiple Accounts Found</strong><br>
+                    <span class="text-muted">We found @Model.Count accounts with the email address <strong>@Model[0].Email</strong>. You can link these accounts to merge them into one.</span>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                @for (int i = 0; i < Model.Count; i++)
+                {
+                    var user = Model[i];
+                    <div class="col-lg-6">
+                        <div class="account-card">
+                            <div class="d-flex align-items-start gap-3">
+                                <div class="account-avatar">
+                                    @if (!string.IsNullOrEmpty(user.picture))
+                                    {
+                                        <img src="@user.picture" alt="Profile Picture" />
+                                    }
+                                    else
+                                    {
+                                        <div class="avatar-placeholder">
+                                            @(user.Name?.FirstOrDefault().ToString().ToUpper() ?? "U")
+                                        </div>
+                                    }
+                                </div>
+                                
+                                <div class="flex-grow-1">
+                                    <h5 class="account-name">@(user.Name ?? "Unnamed Account")</h5>
+                                    <p class="account-email">@user.Email</p>
+                                    
+                                    <div class="account-details">
+                                        <div class="detail-item">
+                                            <small class="text-muted">User ID:</small>
+                                            <code class="user-id">@user.user_id</code>
+                                        </div>
+                                        
+                                        @if (user.identities != null && user.identities.Any())
+                                        {
+                                            <div class="detail-item">
+                                                <small class="text-muted">Provider:</small>
+                                                <span class="provider-badge">
+                                                    <i class="fas fa-@(user.identities.First().provider == "google-oauth2" ? "google" : user.identities.First().provider == "facebook" ? "facebook" : "user") me-1"></i>
+                                                    @user.identities.First().provider
+                                                </span>
+                                            </div>
+                                        }
+                                        
+                                        @if (!string.IsNullOrEmpty(user.created_at))
+                                        {
+                                            <div class="detail-item">
+                                                <small class="text-muted">Created:</small>
+                                                <span>
+                                                    @try
+                                                    {
+                                                        @DateTime.Parse(user.created_at).ToString("MMM dd, yyyy")
+                                                    }
+                                                    catch
+                                                    {
+                                                        @user.created_at
+                                                    }
+                                                </span>
+                                            </div>
+                                        }
+                                    </div>
+                                    
+                                    @if (Model.Count > 1)
+                                    {
+                                        <div class="mt-3">
+                                            @using (Html.BeginForm("LinkAccount", "Account", FormMethod.Post))
+                                            {
+                                                <input type="hidden" name="primaryUserId" value="@(i == 0 ? Model[1].user_id : Model[0].user_id)" />
+                                                <input type="hidden" name="secondaryUserId" value="@user.user_id" />
+                                                <input type="hidden" name="provider" value="@(user.identities?.FirstOrDefault()?.provider ?? "auth0")" />
+                                                <button type="submit" class="btn btn-modern btn-sm" onclick="return confirm('Are you sure you want to link this account?')">
+                                                    <i class="fas fa-link me-1"></i>Link Account
+                                                </button>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+            
+            @if (Model.Count > 1)
+            {
+                <div class="mt-4 p-3" style="background: rgba(245, 158, 11, 0.1); border-radius: 12px; border-left: 4px solid #f59e0b;">
+                    <h6 class="mb-2"><i class="fas fa-exclamation-triangle me-2" style="color: #f59e0b;"></i>Important Information</h6>
+                    <ul class="mb-0 text-muted small">
+                        <li>Linking accounts will merge them into a single account</li>
+                        <li>You'll be able to sign in using any of the linked identity providers</li>
+                        <li>This action cannot be easily undone</li>
+                        <li>All data from both accounts will be preserved</li>
+                    </ul>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="fas fa-user-check" style="font-size: 4rem; color: #10b981; margin-bottom: 1rem;"></i>
+                <h4>No Multiple Accounts Found</h4>
+                <p class="text-muted">You only have one account associated with your email address.</p>
+                <a href="/Home/Index" class="btn btn-modern">
+                    <i class="fas fa-home me-2"></i>Return Home
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+.account-card {
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(79, 70, 229, 0.1);
+    border-radius: 16px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.account-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    border-color: rgba(79, 70, 229, 0.2);
+}
+
+.account-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.account-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1.5rem;
+}
+
+.account-name {
+    margin-bottom: 0.25rem;
+    color: #1e293b;
+    font-weight: 600;
+}
+
+.account-email {
+    color: #64748b;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.account-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.user-id {
+    background: rgba(79, 70, 229, 0.1);
+    color: #4f46e5;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-family: monospace;
+}
+
+.provider-badge {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+</style> 

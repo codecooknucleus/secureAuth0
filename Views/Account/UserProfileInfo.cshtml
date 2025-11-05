@@ -1,0 +1,61 @@
+﻿@model secureAuth0.Models.UserProfile
+
+@{
+    ViewData["Title"] = "Full User Info";
+}
+
+<h2 class="text-center">Full User Info from Auth0</h2>
+<div class="user-profile" style="max-width:600px;margin:40px auto;">
+    <div style="display:flex;justify-content:center;align-items:center;margin-bottom:24px;">
+        <img src="@Model.picture" alt="Profile Image" style="width:140px;height:140px;border-radius:50%;object-fit:cover;box-shadow:0 2px 12px rgba(0,0,0,0.10);" />
+    </div>
+    <div style="display:flex;gap:32px;">
+        <div style="flex:1;">
+            <dl>
+                <dt>Name:</dt>
+                <dd>@Model.Name</dd>
+                <dt>Email:</dt>
+                <dd>@Model.Email</dd>
+                <dt>Nickname:</dt>
+                <dd>@Model.nickname</dd>
+                <dt>Email Verified:</dt>
+                <dd>@Model.email_verified</dd>
+                <dt>User ID:</dt>
+                <dd>@Model.user_id</dd>
+                <dt>Created At:</dt>
+                <dd>@Model.created_at</dd>
+                <dt>Updated At:</dt>
+                <dd>@Model.updated_at</dd>
+            </dl>
+        </div>
+        <div style="flex:1;">
+            <dl>
+                <dt>Last Login:</dt>
+                <dd>@Model.last_login</dd>
+                <dt>Last IP:</dt>
+                <dd>@Model.last_ip</dd>
+                <dt>Logins Count:</dt>
+                <dd>@Model.logins_count</dd>
+                <dt>Last Password Reset:</dt>
+                <dd>@Model.last_password_reset</dd>
+                <dt>User Mobile:</dt>
+                @* <dd>@Model.user_metadata?.user_mobile</dd> *@
+                <dd>@Model.user_metadata?.phone_number</dd>
+            </dl>
+        </div>
+    </div>
+    <h4>App Metadata</h4>
+    <dl>
+        <dt>Privacy Policies:</dt>
+        <dd>@Model.app_metadata?.privacy_policies</dd>
+        <dt>Privacy Policies Timestamp:</dt>
+        <dd>@Model.app_metadata?.privacy_policies_timestamp</dd>
+    </dl>
+    <h4>Identities</h4>
+    <ul>
+        @foreach (var id in Model.identities ?? new List<secureAuth0.Models.Identity>())
+        {
+            <li>@id.provider | @id.connection | @id.user_id | Social: @id.isSocial</li>
+        }
+    </ul>
+</div> 

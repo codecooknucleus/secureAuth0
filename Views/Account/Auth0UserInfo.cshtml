@@ -1,0 +1,334 @@
+@model secureAuth0.Models.UserProfile
+
+@{
+    ViewData["Title"] = "Profile Details";
+}
+
+<div class="container">
+    <div class="profile-card fade-in-up" style="max-width: 800px;">
+        <!-- Profile Header -->
+        <div class="text-center mb-4">
+            @if (!string.IsNullOrEmpty(Model.picture))
+            {
+                <img src="@Model.picture" alt="Profile Picture" class="profile-avatar" />
+            }
+            else
+            {
+                <div class="profile-avatar d-flex align-items-center justify-content-center mx-auto" style="background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; font-size: 2rem; font-weight: 600;">
+                    @(Model.Name?.FirstOrDefault().ToString().ToUpper() ?? "U")
+                </div>
+            }
+            <h2 class="profile-name">@(Model.Name ?? "User")</h2>
+            <p class="profile-email">@(Model.Email ?? "No email provided")</p>
+        </div>
+
+        <!-- Profile Information Tabs -->
+        <ul class="nav nav-pills nav-fill mb-4" id="profileTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="basic-tab" data-bs-toggle="pill" data-bs-target="#basic" type="button" role="tab">
+                    <i class="fas fa-user me-2"></i>Basic Info
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="security-tab" data-bs-toggle="pill" data-bs-target="#security" type="button" role="tab">
+                    <i class="fas fa-shield-alt me-2"></i>Security
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="identities-tab" data-bs-toggle="pill" data-bs-target="#identities" type="button" role="tab">
+                    <i class="fas fa-link me-2"></i>Identities
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="profileTabsContent">
+            <!-- Basic Info Tab -->
+            <div class="tab-pane fade show active" id="basic" role="tabpanel">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Full Name</div>
+                            <div class="info-value">@(Model.Name ?? "Not provided")</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Email Address</div>
+                            <div class="info-value">@(Model.Email ?? "Not provided")</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Nickname</div>
+                            <div class="info-value">@(Model.nickname ?? "Not set")</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Email Verified</div>
+                            <div class="info-value">
+                                @if (Model.email_verified)
+                                {
+                                    <span class="badge bg-success"><i class="fas fa-check me-1"></i>Verified</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning"><i class="fas fa-exclamation-triangle me-1"></i>Not Verified</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    @if (Model.user_metadata?.company_name != null || Model.user_metadata?.job_title != null)
+                    {
+                        <div class="col-12">
+                            <h6 class="mt-3 mb-3"><i class="fas fa-briefcase me-2"></i>Work Information</h6>
+                        </div>
+                        @if (Model.user_metadata?.company_name != null)
+                        {
+                            <div class="col-md-6">
+                                <div class="info-item">
+                                    <div class="info-label">Company</div>
+                                    <div class="info-value">@Model.user_metadata.company_name</div>
+                                </div>
+                            </div>
+                        }
+                        @if (Model.user_metadata?.job_title != null)
+                        {
+                            <div class="col-md-6">
+                                <div class="info-item">
+                                    <div class="info-label">Job Title</div>
+                                    <div class="info-value">@Model.user_metadata.job_title</div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+
+            <!-- Security Tab -->
+            <div class="tab-pane fade" id="security" role="tabpanel">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">User ID</div>
+                            <div class="info-value" style="font-family: monospace; font-size: 0.9rem;">@(!string.IsNullOrEmpty(Model.user_id) ? Model.user_id : "Not available")</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Account Created</div>
+                            <div class="info-value">
+                                @if (!string.IsNullOrEmpty(Model.created_at))
+                                {
+                                    @try
+                                    {
+                                        @DateTime.Parse(Model.created_at).ToString("MMM dd, yyyy")
+                                    }
+                                    catch
+                                    {
+                                        @Model.created_at
+                                    }
+                                }
+                                else
+                                {
+                                    <text>Not available</text>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Last Updated</div>
+                            <div class="info-value">
+                                @if (!string.IsNullOrEmpty(Model.updated_at))
+                                {
+                                    @try
+                                    {
+                                        @DateTime.Parse(Model.updated_at).ToString("MMM dd, yyyy")
+                                    }
+                                    catch
+                                    {
+                                        @Model.updated_at
+                                    }
+                                }
+                                else
+                                {
+                                    <text>Not available</text>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Last Login</div>
+                            <div class="info-value">
+                                @if (!string.IsNullOrEmpty(Model.last_login))
+                                {
+                                    @try
+                                    {
+                                        @DateTime.Parse(Model.last_login).ToString("MMM dd, yyyy")
+                                    }
+                                    catch
+                                    {
+                                        @Model.last_login
+                                    }
+                                }
+                                else
+                                {
+                                    <text>Not available</text>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Login Count</div>
+                            <div class="info-value">@Model.logins_count times</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="info-label">Last IP Address</div>
+                            <div class="info-value" style="font-family: monospace;">@(!string.IsNullOrEmpty(Model.last_ip) ? Model.last_ip : "Not available")</div>
+                        </div>
+                    </div>
+                    @if (Model.app_metadata?.privacy_policies != null)
+                    {
+                        <div class="col-12">
+                            <h6 class="mt-3 mb-3"><i class="fas fa-shield-alt me-2"></i>Privacy Settings</h6>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <div class="info-label">Privacy Policy Accepted</div>
+                                <div class="info-value">
+                                    @if (Model.app_metadata.privacy_policies)
+                                    {
+                                        <span class="badge bg-success"><i class="fas fa-check me-1"></i>Accepted</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary"><i class="fas fa-times me-1"></i>Not Accepted</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        @if (Model.app_metadata.privacy_policies_timestamp > 0)
+                        {
+                            <div class="col-md-6">
+                                <div class="info-item">
+                                    <div class="info-label">Accepted On</div>
+                                    <div class="info-value">
+                                        @try
+                                        {
+                                            @DateTimeOffset.FromUnixTimeSeconds(Model.app_metadata.privacy_policies_timestamp).ToString("MMM dd, yyyy")
+                                        }
+                                        catch
+                                        {
+                                            @Model.app_metadata.privacy_policies_timestamp.ToString()
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+
+            <!-- Identities Tab -->
+            <div class="tab-pane fade" id="identities" role="tabpanel">
+                @if (Model.identities != null && Model.identities.Any())
+                {
+                    <div class="row g-3">
+                        @foreach (var identity in Model.identities)
+                        {
+                            <div class="col-md-6">
+                                <div class="info-item">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="fas fa-@(identity.provider == "google-oauth2" ? "google" : identity.provider == "facebook" ? "facebook" : identity.provider == "twitter" ? "twitter" : "user") me-2" style="color: #4f46e5;"></i>
+                                        <div class="info-label mb-0">@identity.provider</div>
+                                        @if (identity.isSocial)
+                                        {
+                                            <span class="badge bg-info ms-2">Social</span>
+                                        }
+                                    </div>
+                                    <div class="info-value">
+                                        <small><strong>Connection:</strong> @identity.connection</small><br>
+                                        <small><strong>User ID:</strong> @identity.user_id</small>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center text-muted">
+                        <i class="fas fa-info-circle fa-2x mb-3"></i>
+                        <p>No identity providers linked to this account.</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-4 pt-4 border-top d-flex gap-3 justify-content-center flex-wrap">
+            <a asp-area="" asp-controller="Account" asp-action="MyPrivacy" class="btn btn-outline-modern">
+                <i class="fas fa-shield-alt me-2"></i>Privacy Settings
+            </a>
+            <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteUserModal">
+                <i class="fas fa-trash me-2"></i>Delete Account
+            </button>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteUserModalLabel">Confirm Account Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    <strong>Warning:</strong> This will permanently delete your account and all associated data.<br>
+                    Are you sure you want to proceed?
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button id="confirmDeleteBtn" type="button" class="btn btn-danger">Yes, Delete My Account</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#confirmDeleteBtn').click(function() {
+            $.ajax({
+                url: '/Account/DeleteUser',
+                type: 'POST',
+                data: { userId: '@Model.user_id' },
+                success: function(response) {
+                    var modal = bootstrap.Modal.getInstance(document.getElementById('deleteUserModal'));
+                    if (modal) modal.hide();
+                    alert(response.message);
+                    if (response.success) {
+                        window.location.href = '/';
+                    }
+                },
+                error: function(xhr) {
+                    var modal = bootstrap.Modal.getInstance(document.getElementById('deleteUserModal'));
+                    if (modal) modal.hide();
+                    alert('Error deleting user: ' + xhr.responseText);
+                }
+            });
+        });
+    });
+</script> 

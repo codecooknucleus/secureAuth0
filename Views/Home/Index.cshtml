@@ -1,0 +1,124 @@
+@using Microsoft.AspNetCore.Http
+
+@{
+    ViewData["Title"] = "Home";
+    var nameClaim = User.Claims.FirstOrDefault(c => c.Type == "name")?.Value;
+    var emailClaim = User.Claims.FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.Value;
+    var displayName = !string.IsNullOrWhiteSpace(nameClaim) ? nameClaim : emailClaim ?? User.Identity.Name;
+}
+
+@if (User.Identity.IsAuthenticated)
+{
+    <div class="welcome-card fade-in-up">
+        <div class="mb-4">
+            <i class="fas fa-user-check" style="font-size: 3rem; color: #4f46e5; margin-bottom: 1rem;"></i>
+        </div>
+        <h1 class="welcome-title">Welcome back, @displayName!</h1>
+        <p class="welcome-subtitle">You're securely signed in to your account</p>
+        
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a asp-area="" asp-controller="Account" asp-action="Auth0UserInfo" class="btn btn-modern">
+                <i class="fas fa-user me-2"></i>View Profile
+            </a>
+            <a asp-area="" asp-controller="Account" asp-action="MyPrivacy" class="btn btn-outline-modern">
+                <i class="fas fa-shield-alt me-2"></i>Privacy Settings
+            </a>
+        </div>
+    </div>
+    
+    <!-- Account Status Cards -->
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="content-card text-center" id="accountStatusCard" style="display: none;">
+                    <div class="mb-3">
+                        <i class="fas fa-info-circle" style="font-size: 2rem; color: #3b82f6;"></i>
+                    </div>
+                    <h5 class="mb-3">Account Information</h5>
+                    <p id="accountStatusMessage" class="text-muted"></p>
+                    <div id="accountActions" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="welcome-card fade-in-up">
+        <div class="mb-4">
+            <i class="fas fa-shield-alt" style="font-size: 4rem; color: #4f46e5; margin-bottom: 1rem;"></i>
+        </div>
+        <h1 class="welcome-title">SecureAuth</h1>
+        <p class="welcome-subtitle">Your trusted authentication platform for secure access</p>
+        
+        <div class="mb-4">
+            <div class="row text-center">
+                <div class="col-md-4 mb-3">
+                    <i class="fas fa-lock" style="font-size: 2rem; color: #10b981; margin-bottom: 0.5rem;"></i>
+                    <h6>Secure</h6>
+                    <small class="text-muted">Enterprise-grade security</small>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <i class="fas fa-lightning-bolt" style="font-size: 2rem; color: #f59e0b; margin-bottom: 0.5rem;"></i>
+                    <h6>Fast</h6>
+                    <small class="text-muted">Quick and seamless login</small>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <i class="fas fa-users" style="font-size: 2rem; color: #8b5cf6; margin-bottom: 0.5rem;"></i>
+                    <h6>Trusted</h6>
+                    <small class="text-muted">Used by thousands</small>
+                </div>
+            </div>
+        </div>
+        
+        <a asp-area="" asp-controller="Account" asp-action="Login" class="btn btn-modern btn-lg">
+            <i class="fas fa-sign-in-alt me-2"></i>Get Started
+        </a>
+    </div>
+}
+
+@if (User.Identity.IsAuthenticated)
+{
+    <script>
+        // Wait for jQuery to be available
+        function waitForJQuery() {
+            if (typeof jQuery !== 'undefined') {
+                console.log('jQuery loaded, checking for multiple accounts...');
+                checkMultipleAccounts();
+            } else {
+                console.log('jQuery not loaded yet, waiting...');
+                setTimeout(waitForJQuery, 100);
+            }
+        }
+        
+        // Enhanced account status display
+        function showAccountStatus(message, hasMultiple = false) {
+            const card = document.getElementById('accountStatusCard');
+            const messageEl = document.getElementById('accountStatusMessage');
+            const actionsEl = document.getElementById('accountActions');
+            
+            if (message && hasMultiple) {
+                messageEl.innerHTML = message;
+                actionsEl.innerHTML = `
+                    <a href="/Account/UsersByEmail" class="btn btn-modern">
+                        <i class="fas fa-link me-2"></i>Manage Accounts
+                    </a>
+                `;
+                card.style.display = 'block';
+                card.classList.add('fade-in-up');
+            }
+        }
+        
+        // Override the global function to use our enhanced display
+        window.showMultipleAccountsPopup = function(message) {
+            showAccountStatus(message, true);
+        };
+        
+        // Start checking when document is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', waitForJQuery);
+        } else {
+            waitForJQuery();
+        }
+    </script>
+}
